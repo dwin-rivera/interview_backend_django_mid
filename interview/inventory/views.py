@@ -7,25 +7,38 @@ from interview.inventory.schemas import InventoryMetaData
 from interview.inventory.serializers import InventoryLanguageSerializer, InventorySerializer, InventoryTagSerializer, InventoryTypeSerializer
 
 
+class InventoryListRetrieveAfterDateView(APIView):
+    queryset = Inventory.objects.all()
+    serializer_class = InventorySerializer
+
+    def get(self, request: Request, date: str, *args, **kwargs) -> Response:
+        serializer = self.serializer_class(self.get_queryset(date), many=True)
+
+        return Response(serializer.data, status=200)
+
+    def get_queryset(self, date):
+        return self.queryset.filter(created_at__gt=date)
+
+
 class InventoryListCreateView(APIView):
     queryset = Inventory.objects.all()
     serializer_class = InventorySerializer
-    
+
     def post(self, request: Request, *args, **kwargs) -> Response:
         try:
             metadata = InventoryMetaData(**request.data['metadata'])
         except Exception as e:
             return Response({'error': str(e)}, status=400)
-        
+
         request.data['metadata'] = metadata.dict()
         serializer = self.serializer_class(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
-        
+
         serializer.save()
-        
+
         return Response(serializer.data, status=201)
-    
+
     def get(self, request: Request, *args, **kwargs) -> Response:
         serializer = self.serializer_class(self.get_queryset(), many=True)
         

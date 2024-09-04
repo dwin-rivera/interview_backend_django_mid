@@ -54,3 +54,7 @@ class Inventory(NameModel, TimestampedModel, models.Model):
     @classmethod
     def get_by_language(cls, language_id: int):
         return cls.objects.filter(language_id=language_id)
+
+    @classmethod
+    def get_by_date(cls, datestring: str):
+        return cls.object.filter()
